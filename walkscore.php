@@ -15,7 +15,7 @@ $address = str_replace(' ', '-', $address);
 
 // Attempt to get a response from walkscore. Try up to 10 times before giving
 // up, sometimes it fails a couple times.
-$url = "";
+$url = "https://www.walkscore.com/score/{$address}";
 for ($i = 0; $i < 10; $i++) {
     $page = @file_get_contents($url);
     if ($page) {
@@ -24,7 +24,13 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 if (!$page) {
-    respond('Failed to retrieve Walk Score');
+    respond(
+        [
+            err => 'Failed to retrieve Walk Score',
+            url => $url,
+            addr => $address,
+        ]
+        );
 }
 
 $matches = [];
@@ -61,6 +67,10 @@ function respond($data)
     if (is_string($data))
     {
         $data = [ 'err' => $data ];
+        $code = 400;
+    }
+    else if (array_key_exists('err', $data))
+    {
         $code = 400;
     }
 
