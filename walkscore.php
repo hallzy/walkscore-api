@@ -1,17 +1,12 @@
 <?php
 
-header('Content-Type: application/javascript');
-
 // The address of the place you want to get a walkscore for. This can be
 // anything that you would normally search for in the search box on
 // walkscore.com
 $address = $_GET['addr'] ?? NULL;
 
-// The optional variable name to store the results into.
-$variableName = $_GET['variable'] ?? NULL;
-
 if (!$address) {
-    respond('no address or variable name provided');
+    respond('Missing Address');
 }
 
 // Massage address so I can use it with the walkscore website
@@ -20,7 +15,7 @@ $address = str_replace(' ', '-', $address);
 
 // Attempt to get a response from walkscore. Try up to 10 times before giving
 // up, sometimes it fails a couple times.
-$url = "https://www.walkscore.com/score/{$address}";
+$url = "";
 for ($i = 0; $i < 10; $i++) {
     $page = @file_get_contents($url);
     if ($page) {
@@ -29,7 +24,7 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 if (!$page) {
-    respond('Failed to retrieve walkscore');
+    respond('Failed to retrieve Walk Score');
 }
 
 $matches = [];
@@ -56,7 +51,8 @@ respond(
 
 function respond($data)
 {
-    global $variableName;
+    // The optional variable name to store the results into.
+    $variableName = $_GET['variable'] ?? NULL;
 
     $isJsonp = isset($variableName);
     $code = 200;
@@ -68,13 +64,15 @@ function respond($data)
         $code = 400;
     }
 
-    // Provide JSONp support
+    // Provide JSONP support
     if ($isJsonp)
     {
+        header('Content-Type: application/javascript');
         echo "window.{$variableName} = " . json_encode($data) . ";";
     }
     else
     {
+        header('Content-Type: application/json');
         echo json_encode($data);
     }
 
