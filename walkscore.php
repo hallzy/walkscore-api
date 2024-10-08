@@ -1,4 +1,5 @@
 <?php
+header('Access-Control-Allow-Origin: *');
 
 // The address of the place you want to get a walkscore for. This can be
 // anything that you would normally search for in the search box on
